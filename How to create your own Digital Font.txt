@@ -1,0 +1,47 @@
+******************************************************************************
+**                                                                          **
+** User manual to create and add custom digital fonts for use in the        **
+** NLDDigiLabel component.                                                  **
+**                                                                          **
+******************************************************************************
+
+First, het fonts are stored in the resource-file "DigitFonts.res" and under
+the resourcetype DIGITFONT.
+
+You can add your fonts by any resource-editor, for example: XNResourceEditor
+See: http://www.nldelphi.com/Forum/showthread.php?t=20253
+
+The resources are in plain text, and the format is:
+
+    Width=7
+    Height=15
+    Spacing=10
+    Thickness=1
+    Pos0=00,00,03,00,07,00,06,01,03,01,01,01
+    Pos1=01,07,03,07,06,07,06,08,03,08,01,08
+    Pos2=01,14,03,14,06,14,07,15,03,15,00,15
+    Pos3=01,02,01,04,01,06,00,07,00,04,00,01
+    Pos4=07,01,07,04,07,07,06,06,06,04,06,02
+    Pos5=01,09,01,11,01,13,00,14,00,11,00,08
+    Pos6=07,08,07,11,07,14,06,13,06,11,06,09
+
+Width and Height are the sizes of one digit.
+
+The Spacing is the horizontal spacing between two digits, including the width
+of the digit.
+
+The Thickness is the thickness of the segments, but is in the component also
+used for determination of the margin around the digits if AutoSize = True,
+which are presumed equal.
+
+The indexes of the seven Pos's are the same indexes of the TSegmentPos type
+in the unit (spTop, spCentre, spBottom, spTopLeft, spTopRight, spBottomLeft,
+spBottomRight), which tell the position of each digit-segment.
+
+Each segment is defined by six points, which are repeatedly given by six
+X- and Y-coordinate couples. So in the above example, the top segment is made
+out of the points (0,0), (3,0), (7,0), (6,1), (3,1), (1,1).
+
+Note that each segment has to be declared by 6 points, also if the segment
+can be defined by less points; like in the above example it could be just
+four points.
