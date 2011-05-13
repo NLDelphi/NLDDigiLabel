@@ -27,12 +27,12 @@ The resources are in plain text, and the format is:
 
 Width and Height are the sizes of one digit.
 
-The Spacing is the horizontal spacing between two digits, including the width
-of the digit.
+Spacing is the horizontal spacing between two digits, including the width of
+one digit.
 
-The Thickness is the thickness of the segments, but is in the component also
-used for determination of the margin around the digits if AutoSize = True,
-which are presumed equal.
+Thickness is the thickness of the segments, but is in the component also used
+for determination of the margin around the digits if AutoSize = True, which
+are presumed equal.
 
 The indexes of the seven Pos's are the same indexes of the TSegmentPos type
 in the unit (spTop, spCentre, spBottom, spTopLeft, spTopRight, spBottomLeft,

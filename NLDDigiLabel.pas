@@ -1,9 +1,25 @@
+{ *************************************************************************** }
+{                                                                             }
+{ NLDDigiLabel  -  www.nldelphi.com Open Source Delphi Component              }
+{                                                                             }
+{ Initiator: Albert de Weerd (aka NGLN)                                       }
+{ License: Free to use, free to modify                                        }
+{ Website: http://www.nldelphi.com/forum/showthread.php?t=26986               }
+{ SVN path: http://svn.nldelphi.com/nldelphi/opensource/ngln/NLDDigiLabel     }
+{                                                                             }
+{ *************************************************************************** }
+{                                                                             }
+{ Date: May 13, 2011                                                          }
+{ Version: 1.0.0.1                                                            }
+{                                                                             }
+{ *************************************************************************** }
+
 unit NLDDigiLabel;
 
 interface
 
 uses
-  Windows, Classes, Controls, Graphics, Messages, StdCtrls;
+  Windows, Classes, Controls, Graphics, Messages, StdCtrls, SysUtils;
 
 type
   TSegmentCoordIndex = 0..11;
@@ -47,22 +63,22 @@ type
     FOnMouseEnter: TNotifyEvent;
     FRealignDigitsNeeded: Boolean;
     FValue: Int64;
-    procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
-    procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
     function GetDigitCount: TDigitCount;
     function GetTransparent: Boolean;
     procedure RealignDigits;
     procedure ReloadFontData;
-    procedure SetAlignment(const Value: TAlignment);
-    procedure SetDigitColor(const Value: TColor);
-    procedure SetDigitCount(const Value: TDigitCount);
+    procedure SetAlignment(Value: TAlignment);
+    procedure SetDigitColor(Value: TColor);
+    procedure SetDigitCount(Value: TDigitCount);
     procedure SetDigitFont(const Value: TFontName);
-    procedure SetDigitGrayColor(const Value: TColor);
-    procedure SetDigitScale(const Value: TDigitScale);
-    procedure SetDisplayNumeralSystem(const Value: TNumeralSystem);
-    procedure SetLayout(const Value: TTextLayout);
-    procedure SetTransparent(const Value: Boolean);
-    procedure SetValue(const Value: Int64);
+    procedure SetDigitGrayColor(Value: TColor);
+    procedure SetDigitScale(Value: TDigitScale);
+    procedure SetDisplayNumeralSystem(Value: TNumeralSystem);
+    procedure SetLayout(Value: TTextLayout);
+    procedure SetTransparent(Value: Boolean);
+    procedure SetValue(Value: Int64);
+    procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
+    procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
   protected
     function GetTextHeight: Integer;
     function GetTextWidth: Integer;
@@ -86,7 +102,6 @@ type
       default False;
     property Value: Int64 read FValue write SetValue default 0;
   protected
-    {TGraphicControl}
     function CanAutoSize(var NewWidth, NewHeight: Integer): Boolean; override;
     function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
     procedure ChangeScale(M, D: Integer); override;
@@ -94,11 +109,10 @@ type
     property Color default clBlack;
     property ParentColor default False;
   public
-    procedure DecValue(const DecBy: Integer = 1);
+    procedure DecValue(DecBy: Integer = 1);
     class function GetDigitFontNames: TStrings;
-    procedure IncValue(const IncBy: Integer = 1);
+    procedure IncValue(IncBy: Integer = 1);
   public
-    {TGraphicControl}
     constructor Create(AOwner: TComponent); override;
     function GetControlsAlignment: TAlignment; override;
     procedure Invalidate; override;
@@ -151,26 +165,16 @@ type
     property OnStartDrag;
   end;
 
-procedure Register;
-
 implementation
 
 {$R DigitFonts.res}
 
-uses
-  SysUtils;
-
-procedure Register;
-begin
-  RegisterComponents('NLDelphi', [TNLDDigiLabel]);
-end;
-
 { TCustomDigiLabel }
 
 resourcestring
-  rsErrFontsMissing = 'Unable to create NLDDigiLabel control:' +
+  SErrFontsMissing = 'Unable to create NLDDigiLabel control:' +
     #10#13#10#13'There are no digital font resources found.';
-  rsErrResCorruptF = 'Unable to load NLDDigiLabel font %s due to ' +
+  SErrResCorruptF = 'Unable to load NLDDigiLabel font %s due to ' +
     'corrupt resource data.';
 
 type
@@ -193,8 +197,7 @@ const
       12283); //spBottomRight: 00010111111111011
 
 var
-  InternDigitFontNames: Pointer;
-  GlobalDigitFontNames: Pointer;
+  DigitFontNames: TStrings;
 
 function TCustomDigiLabel.CanAutoSize(var NewWidth,
   NewHeight: Integer): Boolean;
@@ -243,7 +246,7 @@ end;
 constructor TCustomDigiLabel.Create(AOwner: TComponent);
 begin
   if GetDigitFontNames.Count <= 0 then
-    raise EDigiLabelError.Create(rsErrFontsMissing);
+    raise EDigiLabelError.Create(SErrFontsMissing);
   inherited;
   Color := clBlack;
   ControlStyle := ControlStyle + [csOpaque];
@@ -259,7 +262,7 @@ begin
   Height := GetTextHeight + (2 * FFontData.Thickness);
 end;
 
-procedure TCustomDigiLabel.DecValue(const DecBy: Integer = 1);
+procedure TCustomDigiLabel.DecValue(DecBy: Integer = 1);
 begin
   Dec(FValue, DecBy);
   Invalidate;
@@ -279,18 +282,16 @@ class function TCustomDigiLabel.GetDigitFontNames: TStrings;
   function EnumResNamesProc(hModule: Cardinal; lpszType, lpszName: PChar;
     LParam: Integer): BOOL; stdcall;
   begin
-    TStrings(InternDigitFontNames).Add(lpszName);
+    DigitFontNames.Add(lpszName);
     Result := True;
   end;
 begin
-  if not Assigned(InternDigitFontNames) then
+  if DigitFontNames = nil then
   begin
-    InternDigitFontNames := TStringList.Create;
-    GlobalDigitFontNames := TStringList.Create;
+    DigitFontNames := TStringList.Create;
     EnumResourceNames(HInstance, DefResourceType, @EnumResNamesProc, 0);
   end;
-  TStrings(GlobalDigitFontNames).Assign(InternDigitFontNames);
-  Result := GlobalDigitFontNames;
+  Result := DigitFontNames;
 end;
 
 function TCustomDigiLabel.GetTextHeight: Integer;
@@ -309,7 +310,7 @@ begin
   Result := not (csOpaque in ControlStyle);
 end;
 
-procedure TCustomDigiLabel.IncValue(const IncBy: Integer = 1);
+procedure TCustomDigiLabel.IncValue(IncBy: Integer = 1);
 begin
   Inc(FValue, IncBy);
   Invalidate;
@@ -441,11 +442,11 @@ begin
   except
     on EOutOfMemory do raise;
   else
-    raise EDigiLabelError.CreateFmt(rsErrResCorruptF, [FDigitFont]);
+    raise EDigiLabelError.CreateFmt(SErrResCorruptF, [FDigitFont]);
   end;
 end;
 
-procedure TCustomDigiLabel.SetAlignment(const Value: TAlignment);
+procedure TCustomDigiLabel.SetAlignment(Value: TAlignment);
 begin
   if FAlignment <> Value then
   begin
@@ -455,7 +456,7 @@ begin
   end;
 end;
 
-procedure TCustomDigiLabel.SetDigitColor(const Value: TColor);
+procedure TCustomDigiLabel.SetDigitColor(Value: TColor);
 begin
   if FDigitColor <> Value then
   begin
@@ -464,7 +465,7 @@ begin
   end;
 end;
 
-procedure TCustomDigiLabel.SetDigitCount(const Value: TDigitCount);
+procedure TCustomDigiLabel.SetDigitCount(Value: TDigitCount);
 begin
   if (DigitCount <> Value) and (Value >= Low(TDigitCount)) and
     (Value <= High(TDigitCount)) then
@@ -498,7 +499,7 @@ begin
     end;
 end;
 
-procedure TCustomDigiLabel.SetDigitGrayColor(const Value: TColor);
+procedure TCustomDigiLabel.SetDigitGrayColor(Value: TColor);
 begin
   if FDigitGrayColor <> Value then
   begin
@@ -507,7 +508,7 @@ begin
   end;
 end;
 
-procedure TCustomDigiLabel.SetDigitScale(const Value: TDigitScale);
+procedure TCustomDigiLabel.SetDigitScale(Value: TDigitScale);
 begin
   if (FDigitScale <> Value) and (Value >= Low(TDigitScale)) and
     (Value <= High(TDigitScale)) then
@@ -521,8 +522,7 @@ begin
   end;
 end;
 
-procedure TCustomDigiLabel.SetDisplayNumeralSystem(
-  const Value: TNumeralSystem);
+procedure TCustomDigiLabel.SetDisplayNumeralSystem(Value: TNumeralSystem);
 begin
   if FDisplayNumeralSystem <> Value then
   begin
@@ -531,7 +531,7 @@ begin
   end;
 end;
 
-procedure TCustomDigiLabel.SetLayout(const Value: TTextLayout);
+procedure TCustomDigiLabel.SetLayout(Value: TTextLayout);
 begin
   if FLayout <> Value then
   begin
@@ -541,7 +541,7 @@ begin
   end;
 end;
 
-procedure TCustomDigiLabel.SetTransparent(const Value: Boolean);
+procedure TCustomDigiLabel.SetTransparent(Value: Boolean);
 begin
   if GetTransparent <> Value then
   begin
@@ -553,7 +553,7 @@ begin
   end;
 end;
 
-procedure TCustomDigiLabel.SetValue(const Value: Int64);
+procedure TCustomDigiLabel.SetValue(Value: Int64);
 begin
   if FValue <> Value then
   begin
@@ -565,9 +565,7 @@ end;
 initialization
 
 finalization
-  if Assigned(InternDigitFontNames) then
-    TObject(InternDigitFontNames).Free;
-  if Assigned(GlobalDigitFontNames) then
-    TObject(GlobalDigitFontNames).Free;
+  if DigitFontNames <> nil then
+    DigitFontNames.Free;
 
 end.

@@ -1,4 +1,4 @@
-package NLDDigiLabelD7;
+package NLDDigiLabel70;
 
 {$R *.res}
 {$R 'NLDDigiLabel.dcr'}
@@ -33,6 +33,7 @@ requires
 
 contains
   NLDDigiLabel in 'NLDDigiLabel.pas',
-  NLDDigiLabelEdit in 'NLDDigiLabelEdit.pas';
+  NLDDigiLabelEdit in 'NLDDigiLabelEdit.pas',
+  NLDDigiLabelReg in 'NLDDigiLabelReg.pas';
 
 end.
