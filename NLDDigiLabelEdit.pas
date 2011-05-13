@@ -3,7 +3,7 @@ unit NLDDigiLabelEdit;
 interface
 
 uses
-  Classes, DesignEditors, DesignIntf;
+  Classes, DesignEditors, DesignIntf, NLDDigiLabel;
 
 type
   TDigitFontProperty = class(TStringProperty)
@@ -12,18 +12,7 @@ type
     procedure GetValues(Proc: TGetStrProc); override;
   end;
 
-procedure Register;
-
 implementation
-
-uses
-  NLDDigiLabel, Graphics;
-
-procedure Register;
-begin
-  RegisterPropertyEditor(TypeInfo(TFontName), TNLDDigiLabel, 'DigitFont',
-    TDigitFontProperty);
-end;
 
 { TDigitFontProperty }
 
