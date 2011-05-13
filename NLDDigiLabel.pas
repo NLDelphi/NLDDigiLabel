@@ -5,7 +5,7 @@
 { Initiator: Albert de Weerd (aka NGLN)                                       }
 { License: Free to use, free to modify                                        }
 { Website: http://www.nldelphi.com/forum/showthread.php?t=26986               }
-{ SVN path: http://svn.nldelphi.com/nldelphi/opensource/ngln/NLDDigiLabel     }
+{ SVN path: http://svn.nldelphi.com/nldelphi/opensource/ngln/nlddigilabel     }
 {                                                                             }
 { *************************************************************************** }
 {                                                                             }
