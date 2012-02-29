@@ -102,6 +102,7 @@ type
       default False;
     property Value: Int64 read FValue write SetValue default 0;
   protected
+    procedure AdjustSize; override;
     function CanAutoSize(var NewWidth, NewHeight: Integer): Boolean; override;
     function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
     procedure ChangeScale(M, D: Integer); override;
@@ -199,6 +200,11 @@ const
 var
   DigitFontNames: TStrings;
 
+procedure TCustomDigiLabel.AdjustSize;
+begin
+  SetBounds(Left, Top, Width, Height);
+end;
+
 function TCustomDigiLabel.CanAutoSize(var NewWidth,
   NewHeight: Integer): Boolean;
 begin
@@ -206,7 +212,7 @@ begin
   NewHeight := GetTextHeight + (FDigitScale * 2 * FFontData.Thickness);
   if AutoSize and ((NewWidth <> Width) or (NewHeight <> Height)) then
     FRealignDigitsNeeded := True;
-  Result := True;
+  Result := inherited CanAutoSize(NewWidth, NewHeight);
 end;
 
 function TCustomDigiLabel.CanResize(var NewWidth, NewHeight: Integer): Boolean;
@@ -256,6 +262,7 @@ begin
   FDigitScale := 1;
   FDisplayNumeralSystem := nsDecimal;
   FLayout := tlCenter;
+  SetLength(FDigits, 4);
   SetDigitFont(GetDigitFontNames[0]);
   SetDigitCount(4);
   Width := GetTextWidth + (2 * FFontData.Thickness);
@@ -336,7 +343,7 @@ var
   Combine: Integer;
   iPos: TSegmentPos;
 begin
-  inherited;
+  inherited Paint;
   if not Transparent then
   begin
     Canvas.Brush.Color := Color;
