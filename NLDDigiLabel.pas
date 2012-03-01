@@ -21,6 +21,10 @@ interface
 uses
   Windows, Classes, Controls, Graphics, Messages, StdCtrls, SysUtils;
 
+const
+  DefDigitColor = clYellow;
+  DefDigitGrayColor = $00004040;
+
 type
   TSegmentCoordIndex = 0..11;
   TSegmentCoords = array[TSegmentCoordIndex] of Word;
@@ -80,17 +84,23 @@ type
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
     procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
   protected
+    procedure AdjustSize; override;
+    function CanAutoSize(var NewWidth, NewHeight: Integer): Boolean; override;
+    function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
+    procedure ChangeScale(M, D: Integer); override;
     function GetTextHeight: Integer;
     function GetTextWidth: Integer;
+    procedure Paint; override;
     property Alignment: TAlignment read FAlignment write SetAlignment
       default taCenter;
+    property Color default clBlack;
     property DigitColor: TColor read FDigitColor write SetDigitColor
-      default clYellow;
+      default DefDigitColor;
     property DigitCount: TDigitCount read GetDigitCount write SetDigitCount
       default 4;
     property DigitFont: TFontName read FDigitFont write SetDigitFont;
     property DigitGrayColor: TColor read FDigitGrayColor
-      write SetDigitGrayColor default $00004040;
+      write SetDigitGrayColor default DefDigitGrayColor;
     property DigitScale: TDigitScale read FDigitScale write SetDigitScale
       default 1;
     property DisplayNumeralSystem: TNumeralSystem read FDisplayNumeralSystem
@@ -98,17 +108,10 @@ type
     property Layout: TTextLayout read FLayout write SetLayout default tlCenter;
     property OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
     property OnMouseLeave: TNotifyEvent read FOnMouseLeave write FOnMouseLeave;
+    property ParentColor default False;
     property Transparent: Boolean read GetTransparent write SetTransparent
       default False;
     property Value: Int64 read FValue write SetValue default 0;
-  protected
-    procedure AdjustSize; override;
-    function CanAutoSize(var NewWidth, NewHeight: Integer): Boolean; override;
-    function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
-    procedure ChangeScale(M, D: Integer); override;
-    procedure Paint; override;
-    property Color default clBlack;
-    property ParentColor default False;
   public
     procedure DecValue(DecBy: Integer = 1);
     class function GetDigitFontNames: TStrings;
@@ -212,7 +215,7 @@ begin
   NewHeight := GetTextHeight + (FDigitScale * 2 * FFontData.Thickness);
   if AutoSize and ((NewWidth <> Width) or (NewHeight <> Height)) then
     FRealignDigitsNeeded := True;
-  Result := inherited CanAutoSize(NewWidth, NewHeight);
+  Result := True;
 end;
 
 function TCustomDigiLabel.CanResize(var NewWidth, NewHeight: Integer): Boolean;
@@ -226,7 +229,7 @@ procedure TCustomDigiLabel.ChangeScale(M, D: Integer);
 var
   NewScale: Integer;
 begin
-  inherited;
+  inherited ChangeScale(M, D);
   NewScale := MulDiv(FDigitScale, M, D);
   if NewScale < Low(TDigitScale) then
     NewScale := Low(TDigitScale)
@@ -253,18 +256,17 @@ constructor TCustomDigiLabel.Create(AOwner: TComponent);
 begin
   if GetDigitFontNames.Count <= 0 then
     raise EDigiLabelError.Create(SErrFontsMissing);
-  inherited;
+  inherited Create(AOwner);
   Color := clBlack;
-  ControlStyle := ControlStyle + [csOpaque];
+  ControlStyle := [csCaptureMouse, csClickEvents, csDoubleClicks, csOpaque];
   FAlignment := taCenter;
-  FDigitColor := clYellow;
-  FDigitGrayColor := $00004040;
+  FDigitColor := DefDigitColor;
+  FDigitGrayColor := DefDigitGrayColor;
   FDigitScale := 1;
   FDisplayNumeralSystem := nsDecimal;
   FLayout := tlCenter;
   SetLength(FDigits, 4);
   SetDigitFont(GetDigitFontNames[0]);
-  SetDigitCount(4);
   Width := GetTextWidth + (2 * FFontData.Thickness);
   Height := GetTextHeight + (2 * FFontData.Thickness);
 end;
@@ -343,7 +345,6 @@ var
   Combine: Integer;
   iPos: TSegmentPos;
 begin
-  inherited Paint;
   if not Transparent then
   begin
     Canvas.Brush.Color := Color;
