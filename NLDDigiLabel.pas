@@ -3,14 +3,8 @@
 { NLDDigiLabel  -  www.nldelphi.com Open Source Delphi Component              }
 {                                                                             }
 { Initiator: Albert de Weerd (aka NGLN)                                       }
-{ License: Free to use, free to modify                                        }
 { Website: http://www.nldelphi.com/forum/showthread.php?t=26986               }
-{ SVN path: http://svn.nldelphi.com/nldelphi/opensource/ngln/nlddigilabel     }
-{                                                                             }
-{ *************************************************************************** }
-{                                                                             }
-{ Date: May 13, 2011                                                          }
-{ Version: 1.0.0.1                                                            }
+{ GitHub path: https://github.com/NLDelphi/NLDDigiLabel                       }
 {                                                                             }
 { *************************************************************************** }
 
@@ -19,7 +13,13 @@ unit NLDDigiLabel;
 interface
 
 uses
-  Windows, Classes, Controls, Graphics, Messages, StdCtrls, SysUtils;
+  System.Classes,
+  System.SysUtils,
+  Winapi.Windows,
+  Winapi.Messages,
+  Vcl.Controls,
+  Vcl.Graphics,
+  Vcl.StdCtrls;
 
 const
   DefDigitColor = clYellow;
